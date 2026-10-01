@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2f7;
+            margin: 0;
+        }
+
+        .app {
+            max-width: 600px;
+            margin: 60px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        h1 {
+            text-align: center;
+            color: #34495e;
+        }
+
+        .input-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-box input {
+            flex: 1;
+            padding: 13px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .add-btn {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 8px;
+            background: #2980b9;
+            color: white;
+            cursor: pointer;
+        }
+
+        .task {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 5px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .task span {
+            flex: 1;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .delete-btn {
+            border: none;
+            background: #e74c3c;
+            color: white;
+            padding: 7px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #status {
+            text-align: center;
+            color: #777;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <h1>📝 My To-Do List</h1>
+
+    <div class="input-box">
+        <input
+            type="text"
+            id="taskInput"
+            placeholder="Enter a task"
+        >
+
+        <button class="add-btn" onclick="addTask()">
+            Add
+        </button>
+    </div>
+
+    <div id="taskList"></div>
+
+    <p id="status"></p>
+
+</div>
+
+<script>
+
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    function saveTasks() {
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+        displayTasks();
+    }
+
+    function addTask() {
+
+        let input = document.getElementById("taskInput");
+        let taskText = input.value.trim();
+
+        if (taskText === "") {
+            alert("Please enter a task!");
+            return;
+        }
+
+        tasks.push({
+            text: taskText,
+            completed: false
+        });
+
+        input.value = "";
+
+        saveTasks();
+    }
+
+    function completeTask(index) {
+
+        tasks[index].completed = !tasks[index].completed;
+
+        saveTasks();
+    }
+
+    function deleteTask(index) {
+
+        tasks.splice(index, 1);
+
+        saveTasks();
+    }
+
+    function displayTasks() {
+
+        let taskList = document.getElementById("taskList");
+
+        taskList.innerHTML = "";
+
+        tasks.forEach(function(task, index) {
+
+            let div = document.createElement("div");
+
+            div.className = "task";
+
+            div.innerHTML = `
+                <input
+                    type="checkbox"
+                    ${task.completed ? "checked" : ""}
+                    onchange="completeTask(${index})"
+                >
+
+                <span class="${task.completed ? "completed" : ""}">
+                    ${task.text}
+                </span>
+
+                <button
+                    class="delete-btn"
+                    onclick="deleteTask(${index})">
+                    Delete
+                </button>
+            `;
+
+            taskList.appendChild(div);
+        });
+
+        let remaining = tasks.filter(
+            task => !task.completed
+        ).length;
+
+        document.getElementById("status").textContent =
+            remaining + " task(s) remaining";
+    }
+
+    document.getElementById("taskInput")
+        .addEventListener("keydown", function(event) {
+
+            if (event.key === "Enter") {
+                addTask();
+            }
+
+        });
+
+    displayTasks();
+
+</script>
+
+</body>
+</html>
